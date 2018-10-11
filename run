@@ -1,0 +1,17 @@
+# CLASS_PATH=/home/terrence/code/database/cassclient/src/main/java/
+
+APP_PATH=/home/terrence/code/database/cassclient/target/classes/
+# DATASTAX_LIB=/home/terrence/.m2/repository/com/datastax/cassandra/cassandra-driver-core/3.5.1/cassandra-driver-core-3.5.1.jar
+DATASTAX_LIB=/home/terrence/.m2/repository/com/datastax/cassandra/cassandra-driver-core/3.0.0/cassandra-driver-core-3.0.0.jar
+GOOGLE_GUAVA=/home/terrence/.m2/repository/com/google/guava/guava/19.0/guava-19.0.jar
+SLF4J_PATH=/home/terrence/.m2/repository/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar
+NETTY_PATH=/home/terrence/.m2/repository/io/netty/netty-all/4.1.14.Final/netty-all-4.1.14.Final.jar
+LOGGER_PATH=/home/terrence/.m2/repository/org/slf4j/slf4j-api/1.7.12/
+CODAHALE=/home/terrence/.m2/repository/com/codahale/metrics/metrics-core/3.0.2/metrics-core-3.0.2.jar
+CLASS_PATH=$APP_PATH:$DATASTAX_LIB:$GOOGLE_GUAVA:$SLF4J_PATH:$NETTY_PATH:$CODAHALE
+
+
+# echo $CLASS_PATH
+
+# java -cp $CLASS_PATH com/aftercore/cassclient/App $1
+java -cp $CLASS_PATH com/aftercore/cassclient/App $*

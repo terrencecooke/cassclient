@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
+		<item value="493" key="DIALOG_X_ORIGIN"/>
+		<item value="296" key="DIALOG_Y_ORIGIN"/>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="false" key="isRegEx"/>
+		<item value="ParseCommandStatementStates" key="selection"/>
+		<item value="true" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="false" key="wholeword"/>
+		<list key="findhistory">
+			<item value="ParseCommandStatements"/>
+			<item value="userPrompt("/>
+			<item value="userPrompt"/>
+			<item value="handleUserPrompt"/>
+			<item value="System.exit"/>
+			<item value="CommandEntry"/>
+			<item value="StringMethodMap"/>
+			<item value="setOperation"/>
+		</list>
+		<list key="replacehistory">
+			<item value="ParseCommandStatementStates"/>
+			<item value="CommandEntry"/>
+			<item value="curChar"/>
+			<item value="convertIntsToString"/>
+			<item value="convertUserPromptInputToString"/>
+			<item value="handleUserPrompt"/>
+			<item value="setupConnection("/>
+			<item value="processLaunchInput"/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="332" key="DIALOG_WIDTH"/>
+		<item value="1|Ubuntu|11.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+		<item value="512" key="DIALOG_HEIGHT"/>
+		<item value="993" key="DIALOG_X_ORIGIN"/>
+		<item value="58" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>

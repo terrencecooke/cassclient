@@ -1,0 +1,1 @@
+INDEX VERSION 1.126+/home/terrence/code/database/cassclient/src/main/java/com/aftercore/cassclient/.metadata/.plugins/org.eclipse.jdt.core
