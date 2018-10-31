@@ -28,7 +28,7 @@ public class App
 	public static App instance;
 	
 	public static List<CommandEntry> commandList = new ArrayList();
-	
+		
 	public String[] launch_input;
 	
 	public List<SimpleStatement> stmts = new ArrayList();
@@ -47,7 +47,7 @@ public class App
 	
 	String current_keyspace;
 	
-	
+	public int curCmdStmt=0;
 	
 	static {
 		
@@ -70,6 +70,90 @@ public class App
 		
 		CommandEntry cmd_exit = new CommandEntry("exit", (instance)-> instance.exitApp() );
 		commandList.add(cmd_exit);
+		
+		CommandEntry cqlcmd_create = new CommandEntry("create", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_create);
+		
+		CommandEntry cqlcmd_select = new CommandEntry("select", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_select);
+		
+		CommandEntry cqlcmd_insert = new CommandEntry("insert", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_insert);
+		
+		// UPDATE
+		CommandEntry cqlcmd_update = new CommandEntry("update", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_update);
+		
+		// DELETE
+		CommandEntry cqlcmd_delete = new CommandEntry("delete", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_delete);
+		
+		// DROP
+		CommandEntry cqlcmd_drop = new CommandEntry("drop", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			instance.runQuery(query);
+			} );
+		commandList.add(cqlcmd_drop);
+		
+		
+		
 	}
 	
     public static void main( String[] args )
@@ -168,10 +252,110 @@ public class App
         
     }	// End of setupConnection()
     
+    void runQuery(String query) {
+    	
+    	String query_stmt = query + ";";
+    	SimpleStatement statement = new SimpleStatement(query_stmt);
+    	
+    	ResultSetFuture query_status = session.executeAsync(statement);
+        ResultSet userSelectResult = null;
+        boolean exception_occurred = false;
+        try {
+        	userSelectResult = query_status.getUninterruptibly(5000L, TimeUnit.MILLISECONDS);
+        }
+        catch (TimeoutException q_exception) {
+        	System.out.println("Timeout ERROR: " + q_exception.getMessage());
+        	exception_occurred = true;
+        }
+        catch (QueryExecutionException q_exception) {
+        	System.out.println("ERROR: Query execution exception\n" + q_exception.getMessage());
+        	exception_occurred = true;
+        }
+        catch (NoHostAvailableException	q_exception) {
+        	System.out.println("ERROR: Specified Host Unavailable!\n" + q_exception.getMessage());
+        	exception_occurred = true;
+        }
+        catch (QueryValidationException q_exception) {
+        	System.out.println("ERROR: Query syntax error\n" + q_exception.getMessage());
+        	exception_occurred = true;
+        }
+        
+        if (!exception_occurred)	{
+        	System.out.println("Execution complete!");
+        	
+        	List<Row> rows = userSelectResult.all();
+        	
+        	if(rows.isEmpty()) return;
+            
+            System.out.println("Retrieved rows\n");
+            
+            /*
+            System.out.println("first_name\tlast_name\n");
+            
+            for(Row row : rows) {
+            	System.out.print( row.getString("first_name") + "\t\t");
+            	System.out.println( row.getString("last_name") );
+            }
+            */
+            
+            boolean display_column_heading = false;
+            for(Row row : rows) {
+            	
+            	ColumnDefinitions col_defs = row.getColumnDefinitions();
+            	
+            	int col_size = col_defs.size();
+            	
+            	if(!display_column_heading) {
+            		// display column names as a heading
+            		
+            		System.out.print("\n");
+            		for(int col_index=0; col_index < col_size; col_index++) {
+            			System.out.print(col_defs.getName(col_index) + "\t\t");
+            		}
+            		System.out.println("");
+            		
+            		for(int col_index = 0; col_index < col_size; col_index++)
+            			System.out.print("=====================");
+            		System.out.println("");
+            		
+            		display_column_heading = true;
+            	}
+            	
+            	for(int col_index = 0; col_index < col_size; col_index++) {
+            		
+            		String row_value = row.getString(col_defs.getName(col_index));
+            		if(row_value==null) row_value = "null";
+            		
+            		String tabs = "\t";
+            		
+            		int num_of_8s = (int)(row_value.length() / 8);	            		
+            		int extra_tabs = 2-num_of_8s;
+            		if(extra_tabs > 0) {
+            			for(int tab_num = 0; tab_num < extra_tabs; tab_num++)
+            				tabs = tabs + "\t";
+            		}
+            		
+            		System.out.print(row_value + tabs);
+            		
+            	}
+            	System.out.println("");
+            	
+            	
+            }	// End of for(Row row : rows) 
+            
+            
+            System.out.println("\n(" + rows.size() + " rows)\n");
+        } // End of if (!exception_occurred)
+        
+    	
+    }	// Endof runQuery(String query)
+    
     void runQuery()	{
     	//System.out.println("Session class: " + session.getClass().getName());
         
-        //SimpleStatement userSelect = new SimpleStatement("SELECT first_name, last_name FROM user;"); 
+        SimpleStatement userSelect = new SimpleStatement("SELECT first_name, last_name FROM user;");
+        
+        stmts.add(userSelect);
         
     	//if(stmts.isEmpty()) return;
 
@@ -268,7 +452,7 @@ public class App
 	            
 	            
 	            System.out.println("\n(" + rows.size() + " rows)\n");
-	        }
+	        } // End of if (!exception_occurred)
     	}	// end of for loop
     	
     	stmts.clear();
