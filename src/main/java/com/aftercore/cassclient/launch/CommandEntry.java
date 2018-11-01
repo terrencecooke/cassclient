@@ -15,9 +15,12 @@ public class CommandEntry {
 	
 	private final boolean hasMethod;
 	
-	protected List<CommandEntry> appOptions = new ArrayList();
+	private final boolean isCqlCommand;
 	
-	public CommandEntry(String p_name, ExecuteCommand p_cmd) {
+	protected List<CommandEntry> appOptions = new ArrayList();
+		
+	
+	public CommandEntry(String p_name, boolean isCqlCmd, ExecuteCommand p_cmd) {
 		
 		commandName = p_name;
 		
@@ -25,6 +28,13 @@ public class CommandEntry {
 		
 		hasMethod = true;
 		
+		isCqlCommand = isCqlCmd;
+		
+	}
+	
+	public CommandEntry(String p_name, ExecuteCommand p_cmd) {
+		
+		this(p_name, false, p_cmd);			
 	}
 	
 	public CommandEntry(String p_name) {
@@ -33,6 +43,12 @@ public class CommandEntry {
 		
 		hasMethod = false;
 		
+		isCqlCommand = false;				
+	}
+		
+	
+	public boolean isCqlCommand() {
+		return isCqlCommand;
 	}
 	
 	public boolean hasMethod() {
