@@ -27,7 +27,7 @@ public class InputParser {
 	
 	String userCommand;
 	
-	String[][] commandStatements;	// First dimension array represent command statements; second dimension array represents command statement contents
+	public String[][] commandStatements;	// First dimension array represent command statements; second dimension array represents command statement contents
 	
 	public InputParser(App app) {
 		
@@ -54,7 +54,10 @@ public class InputParser {
 		
 		// Verify arguments were specified or else terminate
         if(input.length == 0) {
-        	System.out.println("No cassandra node specified");
+        	System.out.println("No cassandra node IP address specified.\n" +
+        			"Make certain you are connecting to a node running Cassandra.\n" +
+        			"If you are running Cassandra on the same machine as this app,\n" +
+        			"try using loopback address 127.0.0.1 as argument");
         	System.exit(1);
         }
         
@@ -493,10 +496,11 @@ public class InputParser {
 			
 			try {
 				executeCommandStatement(i, 0, cassclient.commandList);
+			
 			}
 			catch(MalformedCommandException e) {
 				System.out.println("ERROR: MalformedCommandException thrown ... " + e.getMessage() );
-			}
+			}				
 			
 		}
 		
@@ -514,46 +518,65 @@ public class InputParser {
 		boolean match_found = false;
 		for(CommandEntry entry: list) {
 			
-			if(commandStatements[cmdStmtIndex][cmdArgIndex].compareToIgnoreCase( entry.getCommandName() ) == 0) {	// MATCH FOUND!
-				
-				if( (cmdArgIndex+1) >= commandStatements[cmdStmtIndex].length )	{ // THERE ARE NO MORE ARGUMENTS SPECIFIED BY USER
-					
-					if(entry.hasMethod())	// HAS A METHOD + NO ARGUMENTS SPECIFIED BY USER = EXECUTE METHOD			
+			if( entry.isCqlCommand() ) {
+				if(commandStatements[cmdStmtIndex][cmdArgIndex].compareToIgnoreCase( entry.getCommandName() ) == 0) {	// MATCH FOUND!
+					if( entry.hasMethod() ) {
+						cassclient.curCmdStmt = cmdStmtIndex;
 						entry.executeCommand(cassclient);
+					}
 					
-					else {	// HAS NO METHOD TO EXECUTED + NO ARGUMENTS SPECIFIED BY USER
+					match_found = true;
+				}				
+			}
+			
+			else {
+				
+				if(commandStatements[cmdStmtIndex][cmdArgIndex].compareToIgnoreCase( entry.getCommandName() ) == 0) {	// MATCH FOUND!
+					
+					// Check: isCqlCommand. If true, run this if statement block, then return match is found (return true)				
+					
+					if( (cmdArgIndex+1) >= commandStatements[cmdStmtIndex].length )	{ // THERE ARE NO MORE ARGUMENTS SPECIFIED BY USER
 						
-						if( !entry.isOptionsEmpty() ) {	// HAS NO METHOD TO EXECUTE + NO ARGUMENTS SPECIFIED BY USER + HAS OPTIONS = ERROR: USER SHOULD SPECIFY ARGUMENTS
-							System.out.println("ERROR: " + commandStatements[cmdStmtIndex][cmdArgIndex] + " command missing arguments");
-						}
-						else // has no method or options ... this command is simply not ready ... HAS NO METHOD NOR ARGUMENTS!! THIS SHOULD NOT BE!!
-							throw new MalformedCommandException();
+						if(entry.hasMethod())	// HAS A METHOD + NO ARGUMENTS SPECIFIED BY USER = EXECUTE METHOD			
+							entry.executeCommand(cassclient);
+						
+						else {	// HAS NO METHOD TO EXECUTED + NO ARGUMENTS SPECIFIED BY USER
 							
-					}	// End of HAS NO METHOD TO EXECUTED
-					
-				}	// End of if with no arguments
-				
-				else {	// MORE ARGUMENTS ARE SPECIFIED BY USER
-					
-					if( !entry.isOptionsEmpty() ) { // MORE ARGUMENTS ARE SPECIFIED BY USER + MORE OPTIONS = GO FURTHER 
+							if( !entry.isOptionsEmpty() ) {	// HAS NO METHOD TO EXECUTE + NO ARGUMENTS SPECIFIED BY USER + HAS OPTIONS = ERROR: USER SHOULD SPECIFY ARGUMENTS
+								System.out.println("ERROR: " + commandStatements[cmdStmtIndex][cmdArgIndex] + " command missing arguments");
+							}
+							else // has no method or options ... this command is simply not ready ... HAS NO METHOD NOR ARGUMENTS!! THIS SHOULD NOT BE!!
+								throw new MalformedCommandException();
+								
+						}	// End of HAS NO METHOD TO EXECUTED
 						
-						// Recursive call
-						executeCommandStatement(cmdStmtIndex, cmdArgIndex+1, entry.getOptionsList());
+					}	// End of if with no arguments
+					
+					else {	// MORE ARGUMENTS ARE SPECIFIED BY USER
 						
-					}
+						if( !entry.isOptionsEmpty() ) { // MORE ARGUMENTS ARE SPECIFIED BY USER + MORE OPTIONS = GO FURTHER 
+							
+							// Recursive call
+							executeCommandStatement(cmdStmtIndex, cmdArgIndex+1, entry.getOptionsList());
+							
+						}
+						
+						else {	// MORE ARGUMENTS ARE SPECIFIED BY USER + NO MORE OPTIONS = ERROR: NO OPTIONS FOR THIS COMMAND 
+							System.out.println("ERROR: No options should be specified after " + commandStatements[cmdStmtIndex][cmdArgIndex]);
+						}
+						
+					} // End of MORE ARGUMENTS ARE SPECIFIED BY USER BLOCK
 					
-					else {	// MORE ARGUMENTS ARE SPECIFIED BY USER + NO MORE OPTIONS = ERROR: NO OPTIONS FOR THIS COMMAND 
-						System.out.println("ERROR: No options should be specified after " + commandStatements[cmdStmtIndex][cmdArgIndex]);
-					}
-					
-				} // End of MORE ARGUMENTS ARE SPECIFIED BY USER BLOCK
+					match_found = true;
+										
+				}	// End of MATCH FOUND If block
 				
-				match_found = true;
-				
-				break;	// break from for loop
-			}	// End of MATCH FOUND If block
+			}	// End of else (isCqlCommand == false)
+			
+			if(match_found) break;
 			
 		}	// END OF FOR LOOP
+				
 		
 		if(!match_found) {
 			
