@@ -45,7 +45,7 @@ public class App
 	
 	Metadata metadata;
 	
-	String current_keyspace;
+	String current_keyspace = "";
 	
 	public int curCmdStmt=0;
 	
@@ -152,6 +152,29 @@ public class App
 			} );
 		commandList.add(cqlcmd_drop);
 		
+		// USE
+		CommandEntry cqlcmd_use = new CommandEntry("use", true, (instance)-> {
+			String query = "";
+			for(int i=0; i < instance.input_parser.commandStatements[instance.curCmdStmt].length; i++) {
+				if(i==0)
+					query = instance.input_parser.commandStatements[instance.curCmdStmt][i];
+				else
+					query += " " + instance.input_parser.commandStatements[instance.curCmdStmt][i];
+			}
+			
+			boolean results = instance.runQuery(query);
+			if(results) {
+				instance.setKeyspace( instance.input_parser.commandStatements[instance.curCmdStmt][1] );
+			}
+			
+		} );
+		commandList.add(cqlcmd_use);
+
+		// DESCRIBE
+		//CommandEntry cqlcmd_describe = new CommandEntry("describe");
+		
+		
+		//commandList.add(cqlcmd_describe);
 		
 		
 	}
@@ -197,7 +220,7 @@ public class App
     /************************************************************************************************************ 
      * Set operation mode to either test mode or batch mode, depending on launch_input or default value
      ************************************************************************************************************/    
-    	runQuery();
+    	//runQuery();
     	
     }	// End of start()
     
@@ -233,10 +256,12 @@ public class App
         try {
         	System.out.println("Attempting to connect to Cassandra node at address: "
         						+ launch_input[0] + " ... ");        
-        	session = cluster.connect("my_keyspace");
+        	//session = cluster.connect("my_keyspace");
+        	session = cluster.connect();
         }
         catch(Exception e) {
-        	System.out.println("ERROR: Unable to connect to my_keyspace\n" + e.getMessage());
+        	//System.out.println("ERROR: Unable to connect to my_keyspace\n" + e.getMessage());
+        	System.out.println("ERROR: Unable to connect to specified cluster\n" + e.getMessage());
         	System.exit(1);
         }
         
@@ -252,7 +277,7 @@ public class App
         
     }	// End of setupConnection()
     
-    void runQuery(String query) {
+    boolean runQuery(String query) {
     	
     	String query_stmt = query + ";";
     	SimpleStatement statement = new SimpleStatement(query_stmt);
@@ -285,7 +310,7 @@ public class App
         	
         	List<Row> rows = userSelectResult.all();
         	
-        	if(rows.isEmpty()) return;
+        	if(rows.isEmpty()) return true;
             
             System.out.println("Retrieved rows\n");
             
@@ -347,6 +372,9 @@ public class App
             System.out.println("\n(" + rows.size() + " rows)\n");
         } // End of if (!exception_occurred)
         
+        else return false; // exception_occurred is true	
+        
+        return true;
     	
     }	// Endof runQuery(String query)
     
