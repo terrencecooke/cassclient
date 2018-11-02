@@ -214,7 +214,12 @@ public class InputParser {
 	public void userPrompt() {
 		
 		// 1) Prompt user for input and await reply
-		System.out.print("cass_client > ");
+		String keyspace = cassclient.getKeyspace();
+		
+		if(keyspace=="")
+			System.out.print("cass_client > ");
+		else
+			System.out.print("cass_client:" + keyspace + " > ");
 		//System.in.reset();
 		
 		int[] userPromptInput = new int[1024];
